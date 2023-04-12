@@ -1,0 +1,201 @@
+import {
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import { React, useEffect, useState } from 'react';
+import { RadioButton } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
+import color from '../assets/theme/color';
+import CommanHeader from '../components/CommanHeader';
+import size from '../assets/theme/size';
+import weight from '../assets/theme/weight';
+import { BASE_URL } from "@env"
+
+const Checkout = () => {
+
+    const navigation = useNavigation();
+    const back = () => {
+        navigation.goBack();
+    };
+
+
+    const [checked, setChecked] = useState('first');
+    const [addresses, setAddresses] = useState([]);
+
+    useEffect(() => {
+        fetch(`${BASE_URL}/getAddress.php?cust_id=16`)
+            .then((response) => response.json())
+            .then((data) => {
+                if (data.success === "1") {
+                    setAddresses(data.Address_List);
+                    console.log("------------>",data.Address_List);
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching address data:", error);
+            });
+    }, []);
+
+    console.log(addresses)
+    return (
+        <View style={{ flex: 1 }}>
+            <CommanHeader />
+            <ScrollView>
+                <View style={styles.main}>
+                    <Text style={styles.title}>Checkout</Text>
+                    <Text style={styles.subtitle}>Shipping Information</Text>
+                    <Text style={styles.des}>
+                        Choose an address to continue checking out. You will still have a
+                        chance to review and edit your order before it is final.
+                    </Text>
+
+                    {addresses.map((address) => (
+                        <View key={address.address_id}>
+                            <View style={styles.address}>
+                                <RadioButton
+                                    value="first"
+                                    status={checked === 'first' ? 'checked' : 'unchecked'}
+                                    onPress={() => setChecked('first')}
+                                    color={'#302516'}
+                                    marginTop={7}
+                                />
+
+                                <Text style={styles.des}>
+                                    {`${address.addline1.trim()} ${address.addline2.trim()} ${address.nearby.trim()} ${address.city.trim()} ${address.state.trim()}- ${address.pin.trim()} ${address.country.trim()} Phone Number: ${address.phone.trim()}`}
+                                </Text>
+                            </View>
+
+                            <TouchableOpacity onPress={() => navigation.navigate('Address')}>
+                                <Text style={styles.edit}>Edit Address</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ))}
+
+
+                    {/* <View>
+                        <View style={styles.address}>
+                            <RadioButton
+                                value="second"
+                                status={checked === 'second' ? 'checked' : 'unchecked'}
+                                onPress={() => setChecked('second')}
+                                color={'#302516'}
+                            />
+                            <Text style={styles.addressname}>Office /commercial</Text>
+                        </View>
+                        <Text style={styles.des}>
+                            Shreeram Joshi, A210, nh-45, main road, Near Mahal Road, Bhopal,
+                            Madhya Pradesh, 423879, Phone Number :{' '}
+                        </Text>
+                        <TouchableOpacity onPress={() => navigation.navigate('Address')}>
+                            <Text style={styles.edit}>Edit Address</Text>
+                        </TouchableOpacity>
+                    </View> */}
+
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Address')}
+                        style={styles.addressbutton}>
+                        <Icon name="add" style={styles.icon} />
+                        <Text style={styles.editbutton}>Add New Address</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        onPress={() => navigation.navigate('Summary')}
+                        style={[
+                            styles.button,
+                            {
+                                borderWidth: 0,
+                                backgroundColor: color.button,
+                            },
+                        ]}>
+                        <Text style={styles.buttontext}>Use this Address</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity onPress={back} style={styles.button}>
+                        <Text style={styles.buttontext}>Back</Text>
+                    </TouchableOpacity>
+                </View>
+            </ScrollView>
+        </View>
+    );
+};
+
+export default Checkout;
+
+const styles = StyleSheet.create({
+    main: {
+        width: '90%',
+        alignSelf: 'center',
+    },
+    title: {
+        fontSize: size.font20,
+        color: color.black,
+        fontWeight: weight.semi,
+        marginVertical: 20,
+    },
+    subtitle: {
+        fontSize: size.font16,
+        fontWeight: weight.semi,
+        color: color.border,
+    },
+    des: {
+        fontSize: size.font14,
+        fontWeight: weight.low,
+        color: color.text,
+        marginTop: 10,
+        lineHeight: 25,
+        width: '90%'
+    },
+    address: {
+        marginTop: 20,
+        flexDirection: 'row',
+    },
+    addressname: {
+        fontSize: size.font16,
+        fontWeight: weight.semi,
+        color: color.black,
+        marginLeft: 10,
+    },
+    edit: {
+        fontSize: size.font16,
+        fontWeight: weight.semi,
+        color: '#1976D2',
+        textAlign: 'right',
+        marginTop: 10,
+    },
+    addressbutton: {
+        flexDirection: 'row',
+        alignSelf: 'flex-end',
+        marginVertical: 20,
+    },
+    icon: {
+        fontSize: size.font20,
+        color: '#1976D2',
+    },
+    editbutton: {
+        fontSize: size.font16,
+        color: '#1976D2',
+        fontWeight: weight.semi,
+        textAlign: 'right',
+        marginLeft: 5,
+    },
+    button: {
+        width: '100%',
+        height: 50,
+        alignSelf: 'center',
+        marginVertical: 10,
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderWidth: 1,
+    },
+    buttontext: {
+        fontSize: size.font16,
+        fontWeight: weight.semi,
+        color: color.black,
+        textAlign: 'center',
+    },
+});
